@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * serialize and deserialize pojos of type T to and from json
+ * serialize and deserialize pojos to and from json
  *
  * Created by lm on 20.11.15.
  */

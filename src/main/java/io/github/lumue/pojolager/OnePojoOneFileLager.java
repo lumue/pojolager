@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * Pojos are written to disk on put. There is no dirty checking or other sophisticated stuff. If you want to update the persistent representation of an object, just "put" it again with the same key.
  * Created by lm on 20.11.15.
  */
-class OnePojoOneFileLager<V> implements PojoLager<String,V> {
+class OnePojoOneFileLager<V> implements PojoLager<V> {
 
 
 	static final class LagerEntry<V> implements Map.Entry<String,V> {

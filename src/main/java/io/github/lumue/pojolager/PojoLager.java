@@ -8,9 +8,9 @@ import java.util.Map;
  *
  * Created by lm on 20.11.15.
  */
-public interface PojoLager<K,V> extends Map<K,V>,AutoCloseable {
+public interface PojoLager<V> extends Map<String,V>,AutoCloseable {
 
-	static <K,V> PojoLager<K,V> create(Class<V> valueType){
+	static <V> PojoLager<V> create(Class<V> valueType){
 		return new  OnePojoOneFileLager(new JsonPojoSerializer());
 	};
 
