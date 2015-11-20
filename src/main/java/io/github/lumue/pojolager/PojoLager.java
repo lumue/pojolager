@@ -11,8 +11,10 @@ import java.util.Map;
 public interface PojoLager<K,V> extends Map<K,V>,AutoCloseable {
 
 	static <K,V> PojoLager<K,V> create(Class<V> valueType){
-		return new  OnePojoOneFileLager();
+		return new  OnePojoOneFileLager(new JsonPojoSerializer());
 	};
 
 	void connect(String lagerLocation) throws IOException;
+
+	boolean isConnected();
 }
