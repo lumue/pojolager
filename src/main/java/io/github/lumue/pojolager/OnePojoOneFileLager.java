@@ -27,7 +27,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 		private V val;       // non-null
 		private final OnePojoOneFileLager<V> lager;
 
-		LagerEntry(String key, V val, OnePojoOneFileLager lager) {
+		LagerEntry(String key, V val, OnePojoOneFileLager<V> lager) {
 			this.key = key;
 			this.val = val;
 			this.lager=lager;
@@ -126,7 +126,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 	@Override
 	public boolean containsValue(Object value) {
 		assertConnected();
-		return values().parallelStream().filter(v -> value.equals(v)).findFirst().isPresent();
+		return values().parallelStream().filter(value::equals).findFirst().isPresent();
 	}
 
 	@Override
@@ -140,8 +140,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 		FileInputStream inputStream = null;
 		try {
 			inputStream = new FileInputStream(resolveFilePathForKey(key).toFile());
-			V result = getPojoSerializer().deserialize(inputStream);
-			return result;
+			return getPojoSerializer().deserialize(inputStream);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} finally {
@@ -197,7 +196,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 
 	@Override
 	public void putAll(Map<? extends String, ? extends V> m) {
-		m.forEach((key,value) -> put(key,value));
+		m.forEach(this::put);
 	}
 
 	@Override
@@ -235,7 +234,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 	public List<V> values() {
 		return keySet()
 				.parallelStream()
-				.map(key -> get(key))
+				.map(this::get)
 				.collect(Collectors.toList());
 	}
 
@@ -243,7 +242,7 @@ class OnePojoOneFileLager<V> implements PojoLager<String,V> {
 	public Set<Entry<String, V>> entrySet() {
 		return keySet()
 				.parallelStream()
-				.map(key -> new LagerEntry<V>(key,get(key),this))
+				.map(key -> new LagerEntry<>(key, get(key), this))
 				.collect(Collectors.toSet());
 	}
 
