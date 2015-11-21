@@ -13,8 +13,31 @@ version = '0.1'
 repositories {
 	mavenCentral()
 }
+
+sourceSets {
+	loadTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/load-test/java')
+		}
+		resources.srcDir file('src/load-test/resources')
+	}
+}
+
+configurations {
+	loadTestCompile.extendsFrom testCompile
+	loadTestRuntime.extendsFrom testRuntime
+}
+
 dependencies {
 	compile 	'commons-io:commons-io:2.4'
 	compile 	'com.google.code.gson:gson:2.4'
 	testCompile 'junit:junit:4.11'
+}
+
+task loadTest(type: Test) {
+	testClassesDir = sourceSets.loadTest.output.classesDir
+	classpath = sourceSets.loadTest.runtimeClasspath
+	outputs.upToDateWhen { false }
 }

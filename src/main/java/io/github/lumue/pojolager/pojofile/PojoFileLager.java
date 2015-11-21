@@ -188,7 +188,7 @@ public class PojoFileLager<V> implements PojoLager<V> {
 				try {
 					outputStream.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 		}
 	}
