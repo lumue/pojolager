@@ -1,4 +1,7 @@
-package io.github.lumue.pojolager;
+package io.github.lumue.pojolager.pojofile;
+
+import io.github.lumue.pojolager.PojoLager;
+import io.github.lumue.pojolager.PojoSerializer;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -18,25 +21,38 @@ import java.util.stream.Stream;
  * Pojos are written to disk on put. There is no dirty checking or other sophisticated stuff. If you want to update the persistent representation of an object, just "put" it again with the same key.
  * Created by lm on 20.11.15.
  */
-class OnePojoOneFileLager<V> implements PojoLager<V> {
+public class PojoFileLager<V> implements PojoLager<V> {
 
+
+	private static final String FILE_EXTENSION = ".pojo";
 
 	static final class LagerEntry<V> implements Map.Entry<String,V> {
 
 		private final String key; // non-null
 		private V val;       // non-null
-		private final OnePojoOneFileLager<V> lager;
+		private final PojoFileLager lager;
 
-		LagerEntry(String key, V val, OnePojoOneFileLager<V> lager) {
+		LagerEntry(String key, V val, PojoFileLager lager) {
 			this.key = key;
 			this.val = val;
 			this.lager=lager;
 		}
 
-		public String getKey()        { return key; }
-		public V getValue()      { return val; }
-		public int hashCode()    { return key.hashCode() ^ val.hashCode(); }
-		public String toString() { return key + "=" + val; }
+		public String getKey() {
+			return key;
+		}
+
+		public V getValue() {
+			return val;
+		}
+
+		public int hashCode() {
+			return key.hashCode() ^ val.hashCode();
+		}
+
+		public String toString() {
+			return key + "=" + val;
+		}
 
 		public boolean equals(Object o) {
 			Object k, v; Map.Entry<?,?> e;
@@ -47,9 +63,6 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 					(v == val || v.equals(val)));
 		}
 
-		/**
-		 * Sets our entry's value and writes through to the lager
-		 */
 		public V setValue(V value) {
 			if (value == null) throw new NullPointerException();
 			V v = val;
@@ -64,14 +77,14 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 	private Boolean connected=false;
 	private final PojoSerializer<V> pojoSerializer;
 
-	OnePojoOneFileLager(PojoSerializer<V> pojoSerializer) {
+	public PojoFileLager(PojoSerializer<V> pojoSerializer) {
 		this.pojoSerializer = pojoSerializer;
 	}
 
 
 	/**
 	 * connect to a lager at @param lagerLocation. if @param lagerLocation does not exist, it will be created.
-	 * @param lagerLocation path to the filesystem location of a OnePojoOneFileLager
+	 * @param lagerLocation path to the filesystem location of a PojoFileLager
 	 */
 	@Override
 	public synchronized void connect(String lagerLocation) throws IOException {
@@ -120,7 +133,7 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 	@Override
 	public boolean containsKey(Object key) {
 		assertConnected();
-		return Files.exists(resolveFilePathForKey(key));
+		return Files.exists(resolveFilePathForKey(key.toString()));
 	}
 
 	@Override
@@ -139,7 +152,7 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 
 		FileInputStream inputStream = null;
 		try {
-			inputStream = new FileInputStream(resolveFilePathForKey(key).toFile());
+			inputStream = new FileInputStream(resolveFilePathForKey(key.toString()).toFile());
 			return getPojoSerializer().deserialize(inputStream);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -155,8 +168,8 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 
 
 
-	private Path resolveFilePathForKey(Object key) {
-		return resolveDataDirectory().resolve(key.toString());
+	private Path resolveFilePathForKey(String key) {
+		return resolveDataDirectory().resolve(key+FILE_EXTENSION);
 	}
 
 	@Override
@@ -186,7 +199,7 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 		if(result!=null)
 		{
 			try {
-				Files.delete(resolveFilePathForKey(key));
+				Files.delete(resolveFilePathForKey(key.toString()));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -267,7 +280,7 @@ class OnePojoOneFileLager<V> implements PojoLager<V> {
 	private boolean isLocationInitialized() {
 
 		if(this.getLagerLocation()==null)
-			throw new NullPointerException("OnePojoOneFileLager.lagerLocation must not be null ");
+			throw new NullPointerException("PojoFileLager.lagerLocation must not be null ");
 
 		return  Files.exists(getLagerLocation()) && Files.isDirectory(getLagerLocation())
 				&&

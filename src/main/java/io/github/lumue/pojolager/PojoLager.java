@@ -1,5 +1,8 @@
 package io.github.lumue.pojolager;
 
+import io.github.lumue.pojolager.gson.GsonPojoSerializer;
+import io.github.lumue.pojolager.pojofile.PojoFileLager;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -10,8 +13,8 @@ import java.util.Map;
  */
 public interface PojoLager<V> extends Map<String,V>,AutoCloseable {
 
-	static <V> PojoLager<V> create(Class<V> valueType){
-		return new  OnePojoOneFileLager(new JsonPojoSerializer());
+	static <V> PojoLager<V> create(Class<V> pojoType){
+		return new PojoFileLager<>(new GsonPojoSerializer(pojoType));
 	};
 
 	void connect(String lagerLocation) throws IOException;
