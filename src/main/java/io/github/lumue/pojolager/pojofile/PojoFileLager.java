@@ -215,7 +215,7 @@ public class PojoFileLager<V> implements PojoLager<V> {
 	@Override
 	public void clear() {
 		try {
-			final Stream<Path> pathStream = Files.list(lagerLocation);
+			final Stream<Path> pathStream = Files.list(resolveDataDirectory());
 			pathStream.forEach(path -> {
 				try {
 					Files.deleteIfExists(path);
@@ -232,9 +232,9 @@ public class PojoFileLager<V> implements PojoLager<V> {
 	@Override
 	public Set<String> keySet() {
 		try {
-			final Stream<Path> pathStream = Files.list(lagerLocation);
+			final Stream<Path> pathStream = Files.list(resolveDataDirectory());
 			final Set<String> keys = pathStream
-					.map(path-> path.toFile().getName())
+					.map(path-> path.toFile().getName().replace(FILE_EXTENSION,""))
 					.collect(Collectors.toSet());
 			pathStream.close();
 			return keys;

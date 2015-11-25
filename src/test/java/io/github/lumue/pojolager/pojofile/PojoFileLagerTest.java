@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -94,5 +96,35 @@ public class PojoFileLagerTest {
 
 		assertEquals("get should return an object equal to the object put",testperson,returnedPerson);
 
+	}
+
+	@Test
+	public void testKeySet() throws Exception {
+
+		PojoLager<Person> personLager=PojoLager.create(Person.class);
+		personLager.connect(LAGER_LOCATION);
+
+		Person testperson=new Person("1",LocalDate.now());
+		personLager.put("1",testperson);
+
+		Set<String> keySet = personLager.keySet();
+		Assert.assertNotNull("keySet should not return null", keySet);
+		Assert.assertEquals("keySet size should be 1.",1,keySet.size());
+		Assert.assertTrue("keySet should contain \"1\" ",keySet.contains("1"));
+	}
+
+	@Test
+	public void testValues() throws Exception {
+
+		PojoLager<Person> personLager=PojoLager.create(Person.class);
+		personLager.connect(LAGER_LOCATION);
+
+		Person testperson=new Person("1",LocalDate.now());
+		personLager.put("1",testperson);
+
+		Collection<Person> values = personLager.values();
+		Assert.assertNotNull("values() should not return null", values);
+		Assert.assertEquals("values size should be 1.",1,values.size());
+		Assert.assertTrue("values should contain inserted person ",values.contains(testperson));
 	}
 }
